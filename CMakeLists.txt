@@ -103,7 +103,7 @@ else()
 endif()
 
 set(_sources main.cpp)
-set(_headers foo.hpp response.hpp)
+set(_headers thread_pool.hpp response.hpp apply.hpp)
 find_package(CURL 7.43 REQUIRED)
 
 set(GTEST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/gtest/googletest)
