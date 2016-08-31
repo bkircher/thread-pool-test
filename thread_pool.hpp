@@ -73,7 +73,7 @@ namespace foo
 
         struct clear_condition_variable_on_destruct
         {
-            clear_condition_variable_on_destruct()
+            ~clear_condition_variable_on_destruct()
             {
                 this_thread_interrupt_flag.clear_condition_variable();
             }
