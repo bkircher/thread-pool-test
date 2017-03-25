@@ -14,10 +14,9 @@ using namespace foo;
 
 int main()
 {
-    std::vector<std::string> urls{
-        "example.com", "google.com",           "otris.de",     "microsoft.com",
-        "amicaldo.de", "news.ycombinator.com", "curl.haxx.se", "apple.com",
-        "github.com",  "de.godaddy.com"};
+    std::vector<std::string> urls{"example.com", "google.com",           "otris.de",     "microsoft.com",
+                                  "amicaldo.de", "news.ycombinator.com", "curl.haxx.se", "apple.com",
+                                  "github.com",  "de.godaddy.com"};
 
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
@@ -53,4 +52,4 @@ int main()
     return 0;
 }
 
-// vim:et ts=4 sw=4 noic cc=80
+// vim:et ts=4 sw=4 noic cc=120

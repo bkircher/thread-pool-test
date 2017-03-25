@@ -12,24 +12,20 @@ namespace foo
         template <size_t N> struct apply_helper
         {
             template <typename Function, typename Tuple, typename... Args>
-            static auto apply(Function&& func, Tuple&& tuple, Args&&... args)
-                -> decltype(auto)
+            static auto apply(Function&& func, Tuple&& tuple, Args&&... args) -> decltype(auto)
             {
-                return apply_helper<N - 1>::apply(
-                    std::forward<Function>(func), std::forward<Tuple>(tuple),
-                    std::get<N - 1>(std::forward<Tuple>(tuple)),
-                    std::forward<Args>(args)...);
+                return apply_helper<N - 1>::apply(std::forward<Function>(func), std::forward<Tuple>(tuple),
+                                                  std::get<N - 1>(std::forward<Tuple>(tuple)),
+                                                  std::forward<Args>(args)...);
             }
         };
 
         template <> struct apply_helper<0>
         {
             template <typename Function, typename Tuple, typename... Args>
-            static auto apply(Function&& func, Tuple&&, Args&&... args)
-                -> decltype(auto)
+            static auto apply(Function&& func, Tuple&&, Args&&... args) -> decltype(auto)
             {
-                return std::forward<Function>(func)(
-                    std::forward<Args>(args)...);
+                return std::forward<Function>(func)(std::forward<Args>(args)...);
             }
         };
     }
@@ -50,13 +46,11 @@ namespace foo
     //        return 0;
     //    }
     //
-    template <typename Function, typename Tuple>
-    inline auto apply(Function&& func, Tuple&& tuple) -> decltype(auto)
+    template <typename Function, typename Tuple> inline auto apply(Function&& func, Tuple&& tuple) -> decltype(auto)
     {
-        return internal::apply_helper<
-            std::tuple_size<typename std::decay<Tuple>::type>::value>::
-            apply(std::forward<Function>(func), std::forward<Tuple>(tuple));
+        return internal::apply_helper<std::tuple_size<typename std::decay<Tuple>::type>::value>::apply(
+            std::forward<Function>(func), std::forward<Tuple>(tuple));
     }
 }
 
-// vim:et ts=4 sw=4 noic cc=80
+// vim:et ts=4 sw=4 noic cc=120

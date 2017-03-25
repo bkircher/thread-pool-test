@@ -46,10 +46,7 @@ namespace foo
                 }
             }
 
-            bool is_set() const
-            {
-                return flag_.load(std::memory_order_relaxed);
-            }
+            bool is_set() const { return flag_.load(std::memory_order_relaxed); }
 
             void set_condition_variable(std::condition_variable& cond)
             {
@@ -73,10 +70,7 @@ namespace foo
 
         struct clear_condition_variable_on_destruct
         {
-            ~clear_condition_variable_on_destruct()
-            {
-                this_thread_interrupt_flag.clear_condition_variable();
-            }
+            ~clear_condition_variable_on_destruct() { this_thread_interrupt_flag.clear_condition_variable(); }
         };
     }
 
@@ -88,8 +82,7 @@ namespace foo
 
         // Construct with func(args...)
         template <typename Function, typename... Args>
-        explicit interruptible_thread(Function&& func, Args&&... args)
-            : interruptible_thread()
+        explicit interruptible_thread(Function&& func, Args&&... args) : interruptible_thread()
         {
             struct wrapper final
             {
@@ -97,18 +90,15 @@ namespace foo
                 std::tuple<Args...> arguments;
 
                 explicit wrapper(Function&& f, Args&&... as)
-                    : wrapped_function(std::forward<Function>(f)),
-                      arguments(std::forward<Args>(as)...)
+                    : wrapped_function(std::forward<Function>(f)), arguments(std::forward<Args>(as)...)
                 {
                 }
 
-                void operator()(internal::interrupt_flag** flag_ptr,
-                                std::mutex* m, std::condition_variable* c)
+                void operator()(internal::interrupt_flag** flag_ptr, std::mutex* m, std::condition_variable* c)
                 {
                     {
                         std::lock_guard<std::mutex> guard(*m);
-                        *flag_ptr = std::addressof(
-                            internal::this_thread_interrupt_flag);
+                        *flag_ptr = std::addressof(internal::this_thread_interrupt_flag);
                     }
                     c->notify_one();
                     try
@@ -124,10 +114,8 @@ namespace foo
 
             std::mutex flag_mutex;
             std::condition_variable flag_condition;
-            internal_thread_ =
-                std::thread(wrapper(std::forward<Function>(func),
-                                    std::forward<Args>(args)...),
-                            &flag_, &flag_mutex, &flag_condition);
+            internal_thread_ = std::thread(wrapper(std::forward<Function>(func), std::forward<Args>(args)...), &flag_,
+                                           &flag_mutex, &flag_condition);
             std::unique_lock<std::mutex> lock(flag_mutex);
             while (!flag_)
             {
@@ -148,8 +136,7 @@ namespace foo
 
         // Move-construct from other
         interruptible_thread(interruptible_thread&& other) noexcept
-            : internal_thread_(std::move(other.internal_thread_)),
-              flag_(other.flag_)
+            : internal_thread_(std::move(other.internal_thread_)), flag_(other.flag_)
         {
             other.flag_ = nullptr;
         }
@@ -172,17 +159,11 @@ namespace foo
         // Detach thread
         void detach() { internal_thread_.detach(); }
 
-        std::thread::id get_id() const noexcept
-        {
-            return internal_thread_.get_id();
-        }
+        std::thread::id get_id() const noexcept { return internal_thread_.get_id(); }
 
         // On Windows: Win32 HANDLE as void *; on Linux: some representation
         // of pthread_t
-        std::thread::native_handle_type native_handle()
-        {
-            return internal_thread_.native_handle();
-        }
+        std::thread::native_handle_type native_handle() { return internal_thread_.native_handle(); }
 
         // Interrupt this thread at next possible moment
         void interrupt()
@@ -198,8 +179,7 @@ namespace foo
         internal::interrupt_flag* flag_;
     };
 
-    static_assert(std::is_default_constructible<interruptible_thread>::value,
-                  "");
+    static_assert(std::is_default_constructible<interruptible_thread>::value, "");
     static_assert(!std::is_copy_constructible<interruptible_thread>::value, "");
     static_assert(!std::is_copy_assignable<interruptible_thread>::value, "");
     static_assert(std::is_move_constructible<interruptible_thread>::value, "");
@@ -232,9 +212,7 @@ namespace foo
 
     // Lets you wait on a condition variable in an interruptible way
     template <typename Predicate>
-    inline void interruptible_wait(std::condition_variable& cond,
-                                   std::unique_lock<std::mutex>& lock,
-                                   Predicate pred)
+    inline void interruptible_wait(std::condition_variable& cond, std::unique_lock<std::mutex>& lock, Predicate pred)
     {
         interruption_point();
         internal::this_thread_interrupt_flag.set_condition_variable(cond);
@@ -246,8 +224,7 @@ namespace foo
         interruption_point();
     }
 
-    inline void interruptible_wait(std::condition_variable& cond,
-                                   std::unique_lock<std::mutex>& lock)
+    inline void interruptible_wait(std::condition_variable& cond, std::unique_lock<std::mutex>& lock)
     {
         interruption_point();
         internal::this_thread_interrupt_flag.set_condition_variable(cond);
@@ -365,8 +342,7 @@ namespace foo
         auto submit(Function&& function, Args&&... args) // URef
             -> std::future<typename std::result_of<Function(Args...)>::type>
         {
-            typedef
-                typename std::result_of<Function(Args...)>::type result_type;
+            typedef typename std::result_of<Function(Args...)>::type result_type;
 
             if (done_)
             {
@@ -374,8 +350,7 @@ namespace foo
             }
 
             auto taskptr = std::make_shared<std::packaged_task<result_type()>>(
-                std::bind(std::forward<Function>(function),
-                          std::forward<Args>(args)...));
+                std::bind(std::forward<Function>(function), std::forward<Args>(args)...));
 
             std::future<result_type> result = taskptr->get_future();
             tasks_.push([taskptr]() { (*taskptr)(); });
@@ -390,10 +365,7 @@ namespace foo
         class join_threads
         {
         public:
-            explicit join_threads(std::vector<thread_type>& threads)
-                : threads_(threads)
-            {
-            }
+            explicit join_threads(std::vector<thread_type>& threads) : threads_(threads) {}
 
             ~join_threads()
             {
@@ -425,9 +397,8 @@ namespace foo
     // Returns whether f has a result; doesn't block
     template <typename T> bool is_ready(const std::future<T>& f)
     {
-        return f.valid() &&
-               f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+        return f.valid() && f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 }
 
-// vim:et ts=4 sw=4 noic cc=80
+// vim:et ts=4 sw=4 noic cc=120

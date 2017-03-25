@@ -35,8 +35,7 @@ namespace foo
                 return "";
             }
 
-            const auto regex =
-                std::regex("^HTTP\\/\\d\\.\\d \\d{3} ([- \\w]*)\\s*");
+            const auto regex = std::regex("^HTTP\\/\\d\\.\\d \\d{3} ([- \\w]*)\\s*");
             std::smatch match_result;
             if (std::regex_match(line, match_result, regex))
             {
@@ -46,10 +45,9 @@ namespace foo
                 }
             }
 
-            throw std::runtime_error(
-                "failed parsing reason phrase from status line");
+            throw std::runtime_error("failed parsing reason phrase from status line");
         }
     };
 }
 
-// vim:et ts=4 sw=4 noic cc=80
+// vim:et ts=4 sw=4 noic cc=120
