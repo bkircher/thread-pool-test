@@ -1,66 +1,62 @@
-#include <gtest/gtest.h>
-
 #include <algorithm>
+#include <string.h>
 #include <vector>
 
-#include <string.h>
-
+#define CATCH_CONFIG_MAIN
+#include <catch2/catch.hpp>
 #include <response.hpp>
 
 using namespace foo;
 
-namespace
-{
-    inline std::vector<char> from_string(const char* str)
-    {
-        std::vector<char> vec;
-        std::copy(str, str + strlen(str), std::back_inserter(vec));
-        return vec;
+namespace {
+  inline std::vector<char> from_string(const char* str) {
+    std::vector<char> vec;
+    std::copy(str, str + strlen(str), std::back_inserter(vec));
+    return vec;
+  }
+
+  TEST_CASE("response") {
+
+    SECTION("empty header") {
+      response resp;
+      CHECK(resp.status_line() == "");
+      CHECK(resp.reason_phrase() == "");
     }
-}
 
-TEST(TestResponse, EmptyHeader)
-{
-    response resp;
-    EXPECT_STREQ("", resp.status_line().c_str());
-    EXPECT_STREQ("", resp.reason_phrase().c_str());
-}
-
-TEST(TestResponse, ReasonPhrase)
-{
-    response resp;
-    resp.headers = from_string(
-        R"(HTTP/1.1 200 OK
+    SECTION("reason phrase") {
+      response resp;
+      resp.headers = from_string(
+          R"(HTTP/1.1 200 OK
 Content-Type: application/json
 Date: Fri, 10 Jun 2016 16:45:53 GMT
 Connection: keep-alive
 Transfer-Encoding: chunked
 
 )");
-    EXPECT_STREQ("OK", resp.reason_phrase().c_str());
+      CHECK(resp.reason_phrase() == "OK");
 
-    resp.headers = from_string(
-        R"(HTTP/1.1 414 Request-URI Too Long
+      resp.headers = from_string(
+          R"(HTTP/1.1 414 Request-URI Too Long
 Content-Type: text/html; charset=ISO-8859-4
 Content-Length: 2748
 Date: Fri, 10 Jun 2016 16:49:56 GMT
 
 )");
-    EXPECT_STREQ("Request-URI Too Long", resp.reason_phrase().c_str());
-}
+      CHECK(resp.reason_phrase() == "Request-URI Too Long");
+    }
 
-TEST(TestResponse, StatusLine)
-{
-    response resp;
-    resp.headers = from_string(
-        R"(HTTP/1.1 200 OK
+    SECTION("status line") {
+      response resp;
+      resp.headers = from_string(
+          R"(HTTP/1.1 200 OK
 Content-Type: application/json
 Date: Fri, 10 Jun 2016 16:45:53 GMT
 Connection: keep-alive
 Transfer-Encoding: chunked
 
 )");
-    EXPECT_STREQ("HTTP/1.1 200 OK", resp.status_line().c_str());
-}
+      CHECK(resp.status_line() == "HTTP/1.1 200 OK");
+    }
+  }
 
-// vim:et ts=4 sw=4 noic cc=80
+} // namespace
